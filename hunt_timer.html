@@ -1,0 +1,933 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Elite Hunt Timer</title>
+    <style type="text/css">
+        body 
+        {
+            font-family:Arial; font-size:small;
+        }
+        th
+        {
+            font-weight: bold;
+            text-align: left;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;           
+        }
+        .mtime, .ntime 
+        {
+            width: 100%;
+            height: 100%;
+            text-align:center;
+        }
+        .warn 
+        {            
+            background-color: yellow;
+        }
+        .check
+        {
+            color: white;
+            background-color: green;
+        }
+        .over
+        {
+            color: white;
+            background-color: red;
+        }
+    </style>
+    <script src="jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+
+        function formatTime(time) {
+            var date = new Date(time);
+            var hours = date.getHours();
+            var minutes = date.getMinutes();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            var strTime = hours + ':' + minutes + " " + ampm;
+            return strTime;
+        }
+
+        function mark() {
+
+            var button = $(event.target);
+            var imin, imax;
+            var type = button.attr("class");
+            var warn = $("#warn").val();
+            if (button.hasClass("mark_b")) {
+                imin = $("#bmin").val();
+                imax = $("#bmax").val();
+            }
+            else if (button.hasClass("mark_a")) {
+                imin = $("#amin").val();
+                imax = $("#amax").val();
+            }
+            else {
+                imin = $("#smin").val();
+                imax = $("#smax").val();
+            }
+
+            var cell = button.parent();
+            var time = cell.next().children().first();
+
+            var next = cell.next().next().children().first();
+
+            var now = new Date().getTime();
+            var nextMin = now + (imin * 60000);
+            var nextMax = now + (imax * 60000);
+            time.text(formatTime(now));
+            next.removeClass("check");
+            next.removeClass("over");
+            next.attr("nextmin", nextMin);
+            next.attr("nextmax", nextMax);
+            next.attr("nextwarn", nextMin - (warn * 60000));
+            next.text(formatTime(nextMin));
+        }
+
+        function clearMark() {
+            var button = $(event.target);
+            var cell = button.parent();
+            var time = cell.next().children().first();
+            var next = cell.next().next().children().first();
+            time.text("--");
+            next.removeClass("ready").removeClass("warn").removeClass("over");
+            next.removeAttr("nextmin").removeAttr("nextmax").removeAttr("nextwarn");
+            next.text("--");
+        }
+
+        function runCheck() {
+            var now = new Date().getTime();
+            $(".ntime").each(function () {
+                var minSpawn = $(this).attr("nextmin");
+                var maxSpawn = $(this).attr("nextmax");
+                var warn = $(this).attr("nextwarn");
+                if (now >= maxSpawn) {
+                    $(this).removeClass("ready").removeClass("warn").addClass("over");
+                }
+                else if (now >= minSpawn) {
+                    $(this).removeClass("warn").removeClass("ready").addClass("check");
+                }
+                else if (now >= warn) {
+                    $(this).removeClass("over").removeClass("ready").addClass("warn");
+                } 
+                else {
+                    $(this).removeClass("ready").removeClass("warn").removeClass("over");
+                }
+
+            });
+        }
+        function toggleSRank() {
+            $(".srow").toggle();
+        }
+        $(function () {
+            toggleSRank();
+            setInterval(runCheck, 30000);
+        });
+    </script>
+</head>
+<body>
+    <div style="height: 50px;">
+        Warning:
+        <input id="warn" type="text" value="2" style="width:40px" />   
+        B-Rank:
+        <input id="bmin" type="text" value="45" style="width: 40px" />
+        to
+        <input id="bmax" type="text" value="60" style="width: 40px" />
+        A-Rank:
+        <input id="amin" type="text" value="225" style="width: 40px" />
+        to
+        <input id="amax" type="text" value="270" style="width: 40px" />
+        <span class="srow">
+            S-Rank:
+            <input id="smin" type="text" value="2880" style="width: 50px" />
+            to
+            <input id="smax" type="text" value="4320" style="width: 50px" />
+        </span>
+        <div style="height: 50px; float: right">
+            <input type="button" value="Toggle S-Rank" onclick="toggleSRank()" />
+            <input type="button" value="Check Now" onclick="runCheck()" />
+        </div>
+    </div>
+    <table>
+        <colgroup>
+            <col style="width:150px" />
+            <col style="width:150px" />
+            <col style="width:75px" />
+            <col style="width:75px" />
+            <col style="width:150px" />
+            <col style="width:150px" />
+            <col style="width:75px" />
+            <col style="width:75px" />
+            <col style="width:150px" />
+            <col style="width:150px" />
+            <col style="width:75px" />
+            <col style="width:75px" />
+        </colgroup>
+        <tr>
+            <th colspan="4">
+                Outer La Noscea
+            </th>
+            <th colspan="4">
+                Northern Thanalan
+            </th>
+            <th colspan="4">
+                North Shroud
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Vuokho
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Flame Sergeant Dalvag
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Phecda
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Cornu
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Dalvag's Final Flame
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Girtab
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr class="srow">
+            <td>
+                Mahisha
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Minhocao
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Thousand-cast Theda
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                Upper La Noscea
+            </th>
+            <th colspan="4">
+                Central Thanalan
+            </th>
+            <th colspan="4">
+                Central Shroud
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Myradrosh
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Ovjang
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                White Joker
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Marberry
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Sabotender Bailarina
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Forneus
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr class="srow">
+            <td>
+                Nandi
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Brontes
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Laideronnette
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                Western La Noscea
+            </th>
+            <th colspan="4">
+                Western Thanalan
+            </th>
+            <th colspan="4">
+                Eastern Shroud
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Dark Helmet
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Sewer Syrup
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Stinging Sophie
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Nahn
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Alectryon
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Melt
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr class="srow">
+            <td>
+                Bonnacon
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Zona Seeker
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Wulgaru
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                Eastern La Noscea
+            </th>
+            <th colspan="4">
+                Eastern Thanalan
+            </th>
+            <th colspan="4">
+                South Shroud
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Bloody Mary
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Gatling
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Monarch Ogrefly
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Hellsclaw
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Maahes
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Ghede Ti Malice
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr class="srow">
+            <td>
+                Garlok
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Lampalagua
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Mindflayer
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                Middle La Noscea
+            </th>
+            <th colspan="4">
+                Southern Thanalan
+            </th>
+            <th colspan="4">
+                Coerthas
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Skogs Fru
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Albin the Ashen
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Naul
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Vogaal Ja
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Zanig'oh
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Marraco
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr class="srow">
+            <td>
+                Croque-Mitaine
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Nunyunuwi
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Safat
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                Lower La Noscea
+            </th>
+            <th colspan="4">
+                Mor Dhona
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Barbastelle
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Leech King
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_b"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Unktehi
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Kurrea
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_a"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+        <tr class="srow">
+            <td>
+                Croakadile
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+            <td>
+                Agrippa
+            </td>
+            <td>
+                <input type="button" value="Clear" onclick="clearMark()" /><input class="mark_s"
+                    type="button" value="Mark" onclick="mark()" />
+            </td>
+            <td>
+                <div class="mtime">--</div>
+            </td>
+            <td>
+                <div class="ntime">--</div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
